@@ -1,0 +1,178 @@
+CREATE DATABASE   movRental ;
+USE movRental;
+
+-- Table structure for table movies
+--
+  
+  CREATE TABLE movies (
+  movie_id INT NOT NULL PRIMARY KEY,
+  title VARCHAR(300),
+  director VARCHAR(150),
+  year_released INT,
+  category_id INT
+);
+
+-- INSERT INTO MOVIES --
+INSERT INTO movies (movie_id, title, director, year_released, category_id) VALUES
+(1, 'Pirates of the Caribean 4', 'Rob Marshall', 2011, 1),
+(2, 'Forgetting Sarah Marshal', 'Nicholas Stoller', 2008, 2),
+(3, 'X-Men', NULL, 2008, NULL),
+(4, 'Code Name Black', 'Edgar Jimz', 2010, NULL),
+(5, 'Daddy''s Little Girls', NULL, 2007, 8),
+(6, 'Angels and Demons', NULL, 2007, 6),
+(7, 'Davinci Code', NULL, 2007, 6),
+(9, 'Honey mooners', 'John Schultz', 2005, 8),
+(16, '67% Guilty', NULL, 2012, NULL);
+
+
+CREATE TABLE payments (
+  payment_id INT NOT NULL PRIMARY KEY,
+  membership_number INT,
+  payment_date DATE,
+  description VARCHAR(75),
+  amount_paid FLOAT,
+  external_reference_number INT
+);
+
+INSERT INTO payments VALUES (1,1,'2012-07-23','Movie rental payment',2500,11),
+(2,1,'2012-07-25','Movie rental payment',2000,12),(3,3,'2012-07-30','Movie rental payment',6000,NULL);
+
+CREATE TABLE members (
+  membership_number INT NOT NULL,
+  full_names VARCHAR(350) NOT NULL,
+  gender VARCHAR(6),
+  date_of_birth DATE,
+  physical_address VARCHAR(255),
+  postal_address VARCHAR(255),
+  contact_number VARCHAR(75),
+  email VARCHAR(255),
+  PRIMARY KEY (membership_number)
+);
+
+INSERT INTO members VALUES (1,'Janet Jones','Female','1980-07-21','First Street Plot No 4',
+'Private Bag','0759 253 542','janetjones@yagoo.cm'),(2,'Janet Smith Jones','Female',
+'1980-06-23','Melrose 123',NULL,NULL,'jj@fstreet.com'),(3,'Robert Phil','Male',
+'1989-07-12','3rd Street 34',NULL,'12345','rm@tstreet.com'),
+(4,'Gloria Williams','Female','1984-02-14','2nd Street 23',NULL,NULL,NULL);
+
+CREATE TABLE categories (
+  category_id INT NOT NULL,
+  category_name VARCHAR(150),
+  remarks VARCHAR(500),
+  PRIMARY KEY (category_id)
+);
+
+INSERT INTO categories VALUES (1,'Comedy','Movies with humour'),(2,'Romantic','Love stories'),
+(3,'Epic','Story acient movies'),(4,'Horror',NULL),
+(5,'Science Fiction',NULL),(6,'Thriller',NULL),(7,'Action',NULL),(8,'Romantic Comedy',NULL);
+
+CREATE TABLE movierentals (
+  reference_number INT NOT NULL,
+  transaction_date DATE,
+  return_date DATE,
+  membership_number INT,
+  movie_id INT,
+  movie_returned BIT DEFAULT 0,
+  PRIMARY KEY (reference_number)
+);
+
+INSERT INTO movierentals (reference_number, transaction_date, return_date, membership_number, movie_id, movie_returned) VALUES
+(11, '2012-06-20', NULL, 1, 1, 0),
+(12, '2012-06-22', '2012-06-25', 1, 2, 0),
+(13, '2012-06-22', '2012-06-25', 3, 2, 0),
+(14, '2012-06-21', '2012-06-24', 2, 2, 0),
+(15, '2012-06-23', NULL, 3, 3, 0);
+
+-- LIST ALL MOVIE TITLES AND THERE DIRECTORS
+
+SELECT title,director
+FROM movies;
+
+SELECT *
+FROM movierentals;
+
+SELECT *
+FROM members;    
+SELECT *FROM movies;
+
+SELECT *
+FROM payments;
+
+-- 2) Find the full names of all members who have rented a movie.
+SELECT full_names,reference_number
+FROM members M
+JOIN movierentals MR
+ON M.membership_number = MR.membership_number;
+
+-- 3) List all payment descriptions and the amount paid.
+
+SELECT description,amount_paid
+FROM payments;
+
+-- ) Find the details of movies that have never been rented.
+SELECT title
+FROM movies M
+JOIN movierentals MR 
+ON M.movie_id = MR.movie_id
+WHERE MR.movie_id IS  NULL;
+
+-- 5) Get the total amount paid by each member.
+
+SELECT SUM(amount_paid) AS SUM,full_names
+FROM  payments P 
+JOIN members M 
+ON P.membership_number = M.membership_number
+GROUP BY full_names;
+
+-- 6) List all members who have rented 'Pirates of the Caribean 4'.
+
+SELECT M.full_names, MV.title
+FROM members M 
+JOIN movierentals MR
+ON M.membership_number = MR.membership_number
+JOIN movies MV
+ON MV.movie_id = MR.movie_id
+WHERE MV.title = 'Pirates of the Caribean 4';
+
+-- 7) Find the most popular movie category by the number of rentals.
+
+SELECT TOP 2 M.full_names, COUNT(*) AS rental_count
+FROM members M 
+JOIN movierentals MR
+ON M.membership_number = MR.membership_number
+JOIN movies MV
+ON MV.movie_id = MR.movie_id
+GROUP BY M.full_names
+ORDER BY rental_count DESC;
+
+-- 8) List the members who have overdue movies (where the return date is null and today’s date is past the due date).
+
+SELECT M.membership_number, M.full_names
+FROM Members M
+JOIN movierentals MR 
+ON M.membership_number = MR.membership_number
+WHERE MR.return_date IS NULL ;
+AND MR.return_date > GETDATE();
+
+-- 9) Identify the director(s) whose movies have been rented the most.
+
+SELECT TOP 2 MV.director, COUNT(*) AS rental_count
+FROM members M 
+JOIN movierentals MR
+ON M.membership_number = MR.membership_number
+JOIN movies MV
+ON MV.movie_id = MR.movie_id
+GROUP BY MV.director
+ORDER BY rental_count DESC;
+
+-- 10) Find the average age of members who have made a payment in 2012.
+SELECT (DATEDIFF())
+FROM 
+
+SELECT AVG(YEAR(GETDATE()) - YEAR(M.date_of_birth)) AS average_age
+FROM Members M
+JOIN payments P
+ON M.membership_number = P.membership_number
+WHERE payment_date LIKE '2012%';
+
+
