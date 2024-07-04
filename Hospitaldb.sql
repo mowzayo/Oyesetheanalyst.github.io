@@ -486,3 +486,5 @@ WHERE D.DoctorID IN (
 )
 AND A.Status = 'Completed';
 
+Link to report: https://docs.google.com/document/d/1XQ97EVsx8yxzS8IYiiO7XS4h4pABQ0bi/edit?usp=sharing&ouid=111446565330267740289&rtpof=true&sd=true
+
